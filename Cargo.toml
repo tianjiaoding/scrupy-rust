@@ -1,0 +1,6 @@
+[package]
+name = "scrupy"
+version = "0.1.0"
+authors = ["dingtj <dingtj@shanghaitech.edu.cn>"]
+
+[dependencies]
