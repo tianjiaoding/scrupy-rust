@@ -1,12 +1,35 @@
 extern crate hyper;
+extern crate url;
+use self::hyper::client::Body;
 use self::hyper::Client;
-use http::Request;
+use http::{Request, Method};
+use self::url::Url;
 
-pub trait Spider{
+pub trait Spider<'a>{
     fn name(&self) -> &str;
     fn allowed_domains(&self) -> &[String];
     fn start_urls(&self) -> &[String];
-    fn start_requests(&self) -> Vec<Request>;
+    fn start_requests(&self) -> Vec<Request<'a>>{
+        let start_urls = self.start_urls();
+        let requests: Vec<Request>;
+        for start_url in start_urls {
+            match Url::parse(&start_url){
+                Ok(url) => {
+                    requests.push(Request{
+                        url: url,
+                        method: Method::Get,
+                        body: None,
+                        client: Client::new(),
+                    });
+                },
+                Err(e) => {
+                    self.log(&format!("{}", e));
+                }
+            }
+        }
+        requests
+    }
+    fn log(&self, &str);
 }
 
 #[cfg(test)]

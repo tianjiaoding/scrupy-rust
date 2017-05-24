@@ -5,3 +5,4 @@ authors = ["dingtj <dingtj@shanghaitech.edu.cn>"]
 
 [dependencies]
 hyper = "*"
+url = "*"
