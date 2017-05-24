@@ -1,3 +1,6 @@
+mod spider;
+mod http;
+
 #[cfg(test)]
 mod tests {
     #[test]
