@@ -23,7 +23,7 @@ mod tests {
             self.domains.as_slice()
         }
         fn start_urls(&self) -> &[String]{
-
+            self.domains.as_slice()
         }
     }
 

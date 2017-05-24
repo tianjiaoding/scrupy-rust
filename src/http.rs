@@ -1,6 +1,8 @@
 extern crate hyper;
 use self::hyper::Client;
 use self::hyper::client::Body;
+use self::hyper::header::{Header, HeaderFormat};
+
 
 enum Method {
     Get,
