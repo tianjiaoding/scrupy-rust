@@ -27,10 +27,10 @@ impl<'a, B: 'a + Into<Body<'a>>> Request<'a, B> {
         let url_str = self.url.as_str();
         let mut client: RequestBuilder;
         match self.method {
-            ref Get => {
+            Method::Get => {
                 client = self.client.get(url_str);
             },
-            ref Post => {
+            Method::Post => {
                 client = self.client.post(url_str);
             },
         }
@@ -38,5 +38,23 @@ impl<'a, B: 'a + Into<Body<'a>>> Request<'a, B> {
             client = client.body(body);
         }
         client.send()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn request_download() {
+        let url = Url::parse("http://www.baidu.com").unwrap();
+        let client = Client::new();
+        let request:Request<&str> = Request{
+            url: url,
+            method: Method::Get,
+            body: None,
+            client: &client,
+        };
+        request.download().unwrap();
     }
 }

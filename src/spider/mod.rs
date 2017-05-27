@@ -48,6 +48,9 @@ mod tests {
         fn start_urls(&self) -> &[String]{
             self.domains.as_slice()
         }
+        fn log(&self, _str: &str){
+            println!("{}", _str);
+        }
     }
 
     #[test]
