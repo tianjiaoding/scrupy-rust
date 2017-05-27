@@ -1,6 +1,0 @@
-[package]
-name = "test_crate"
-version = "0.1.0"
-authors = ["Richard Ding <dingtj@shanghaitech.edu.cn>"]
-
-[dependencies]
