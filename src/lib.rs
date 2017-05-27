@@ -1,4 +1,4 @@
-// mod spider;
+mod spider;
 mod http;
 
 #[cfg(test)]

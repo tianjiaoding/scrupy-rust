@@ -1,9 +1,9 @@
 extern crate hyper;
 extern crate url;
 use self::hyper::Client;
-use self::hyper::client::{RequestBuilder};
+use self::hyper::client::{Body, RequestBuilder};
 use self::hyper::client::response::Response;
-use self::hyper::header::{HeaderFormat};
+use self::hyper::header::{Header, HeaderFormat};
 use self::hyper::error::Error;
 use self::url::Url;
 
@@ -13,15 +13,16 @@ pub enum Method {
     Post,
 }
 
-pub struct Request
+pub struct Request<'a, B>
+where B: 'a + Into<Body<'a>>
 {
     pub url: Url,
     pub method: Method,
     pub body: Option<String>,
-    pub client: Client,
+    pub client: &'a Client,
 }
 
-impl Request {
+impl<'a, B: 'a + Into<Body<'a>>> Request<'a, B> {
     fn download(self)->Result<Response, Error> {
         let url_str = self.url.as_str();
         let mut client: RequestBuilder;
@@ -33,7 +34,7 @@ impl Request {
                 client = self.client.post(url_str);
             },
         }
-        if let Some(ref body) = self.body{
+        if let Some(body) = self.body{
             client = client.body(body);
         }
         client.send()
@@ -48,11 +49,11 @@ mod tests {
     fn request_download() {
         let url = Url::parse("http://www.baidu.com").unwrap();
         let client = Client::new();
-        let request:Request = Request{
+        let request:Request<&str> = Request{
             url: url,
             method: Method::Get,
             body: None,
-            client: client,
+            client: &client,
         };
         request.download().unwrap();
     }
