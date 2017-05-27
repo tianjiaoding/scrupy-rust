@@ -1,6 +1,6 @@
 extern crate hyper;
 extern crate url;
-use self::hyper::client::Body;
+use self::hyper::client::response::Response;
 use self::hyper::Client;
 use http::{Request, Method};
 use self::url::Url;
@@ -33,6 +33,7 @@ pub trait Spider
     fn log(&self, _str: &str){
         println!("{}", _str);
     }
+    fn parse(&mut self, response: Response) -> (Option<Vec<i32>>, Option<Vec<i32>>);
 }
 
 #[cfg(test)]

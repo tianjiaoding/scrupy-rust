@@ -1,9 +1,9 @@
 extern crate hyper;
 extern crate url;
 use self::hyper::Client;
-use self::hyper::client::{RequestBuilder};
+use self::hyper::client::RequestBuilder;
 use self::hyper::client::response::Response;
-use self::hyper::header::{HeaderFormat};
+use self::hyper::header::HeaderFormat;
 use self::hyper::error::Error;
 use self::url::Url;
 
