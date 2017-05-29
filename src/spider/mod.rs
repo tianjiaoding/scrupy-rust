@@ -5,8 +5,8 @@ use self::hyper::Client;
 use http::{Request, Method};
 use self::url::Url;
 
-pub trait Spider
-{
+pub trait Spider{
+    type ItemOut;
     fn name(&self) -> &str;
     fn allowed_domains(&self) -> &[String];
     fn start_urls(&self) -> &[String];
