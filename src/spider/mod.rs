@@ -6,7 +6,7 @@ use http::{Request, Method};
 use self::url::Url;
 
 pub trait Spider{
-    type ItemOut;
+    type Item;
     fn name(&self) -> &str;
     fn allowed_domains(&self) -> &[String];
     fn start_urls(&self) -> &[String];
@@ -33,7 +33,7 @@ pub trait Spider{
     fn log(&self, _str: &str){
         println!("{}", _str);
     }
-    fn parse(&mut self, response: Response) -> (Option<Vec<i32>>, Option<Vec<i32>>);
+    fn parse(&mut self, response: Response) -> (Option<Vec<Requests>>, Option<Vec<Item>>);
 }
 
 #[cfg(test)]
