@@ -2,20 +2,39 @@ extern crate hyper;
 extern crate url;
 use self::hyper::Client;
 use self::hyper::client::RequestBuilder;
-use self::hyper::client::response::Response as Hpresp;
+use self::hyper::client::response::Response as HpResp;
 use self::hyper::header::{Headers,HeaderFormat};
 use self::hyper::status::StatusCode;
-use self::hyper::error::Error as Hperr;
+use self::hyper::error::Error as HpErr;
 use self::url::Url;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Sender, Receiver};
 use std::thread;
+use std::io::{Read, Error as ReadErr};
 
-
-pub enum Error{
-    Timeout,
-    HyperError(Hperr),
+/// The struct representing the result of a http request.
+#[derive(Debug)]
+pub enum Error {
+    /// Status code is ok, however the program fails to convert the received stream to a vector of bytes.
+    ReadError(Url, ReadErr),
+    /// The status is not ok.
+    BadStatus(Url, StatusCode),
+    /// The program fails to establish a connection to the remote server.
+    ConnectionFailed(Url),
+    /// Timed out.
+    TimedOut(Url),
 }
+
+// impl fmt::Display for UrlState {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         match *self {
+//             UrlState::BadStatus(ref url, ref status) => format!("✘ {} ({})", url, status).fmt(f),
+//             UrlState::ConnectionFailed(ref url) => format!("✘ {} (connection failed)", url).fmt(f),
+//             UrlState::TimedOut(ref url) => format!("✘ {} (timed out)", url).fmt(f),
+//             UrlState::ReadError(ref url, ref err) => format!("✘ {} ({})", url, err).fmt(f),
+//         }
+//     }
+// }
 
 pub enum Method {
     Get,
@@ -59,9 +78,26 @@ impl Request {
             let _ = tx.send(
                 match response{
                     Ok(mut response) => {
-                        if let StatusCode::Ok
+                        if let StatusCode::Ok = response.status{
+                            let mut buffer = vec![];
+                            match response.read_to_end(&mut buffer){
+                                Ok(_) => {
+                                    Ok(Response{
+                                        url: response.url,
+                                        headers: response.headers,
+                                        body: buffer,
+                                    })
+                                },
+                                Err(err) => {
+                                    Err(Error::ReadError(response.url, err))
+                                },
+                            }
+                        }
+                        else {
+                            Err(Error::BadStatus(response.url, response.status))
+                        }
                     },
-                    Err(err) => Err(Error::HyperError(err)),
+                    Err(err) => Err(Error::ConnectionFailed(self.url)),
                 }
             );
         });
