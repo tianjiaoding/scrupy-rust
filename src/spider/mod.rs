@@ -33,7 +33,7 @@ pub trait Spider{
     fn log(&self, _str: &str){
         println!("{}", _str);
     }
-    fn parse(&mut self, response: Response) -> (Option<Vec<Requests>>, Option<Vec<Item>>);
+    fn parse(&mut self, response: Response) -> (Option<Vec<Request>>, Option<Vec<Self::Item>>);
 }
 
 #[cfg(test)]
