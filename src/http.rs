@@ -2,15 +2,13 @@ extern crate hyper;
 extern crate url;
 use self::hyper::Client;
 use self::hyper::client::RequestBuilder;
-use self::hyper::client::response::Response as HpResp;
-use self::hyper::header::{Headers,HeaderFormat};
+use self::hyper::header::Headers;
 use self::hyper::status::StatusCode;
-use self::hyper::error::Error as HpErr;
 use self::url::Url;
 use std::sync::mpsc::channel;
-use std::sync::mpsc::{Sender, Receiver};
 use std::thread;
 use std::io::{Read, Error as ReadErr};
+use std::time::Duration;
 
 /// The struct representing the result of a http request.
 #[derive(Debug)]
@@ -57,23 +55,24 @@ pub struct Request
 
 impl Request {
     fn download(self)->Result<Response, Error> {
-        let url_str = self.url.as_str();
-        let mut client: RequestBuilder;
-        match self.method {
-            Method::Get => {
-                client = self.client.get(url_str);
-            },
-            Method::Post => {
-                client = self.client.post(url_str);
-            },
-        }
-        if let Some(ref body) = self.body{
-            client = client.body(body);
-        }
+        let url = self.url.clone();
+        let url_ = url.clone();
         let (tx, rx) = channel();
         let tx_ = tx.clone();
 
         thread::spawn(move || {
+            let mut client: RequestBuilder;
+            match self.method {
+                Method::Get => {
+                    client = self.client.get(url);
+                },
+                Method::Post => {
+                    client = self.client.post(url);
+                },
+            }
+            if let Some(ref body) = self.body{
+                client = client.body(body);
+            }
             let response = client.send();
             let _ = tx.send(
                 match response{
@@ -83,23 +82,28 @@ impl Request {
                             match response.read_to_end(&mut buffer){
                                 Ok(_) => {
                                     Ok(Response{
-                                        url: response.url,
-                                        headers: response.headers,
+                                        url: response.url.clone(),
+                                        headers: response.headers.clone(),
                                         body: buffer,
                                     })
                                 },
                                 Err(err) => {
-                                    Err(Error::ReadError(response.url, err))
+                                    Err(Error::ReadError(response.url.clone(), err))
                                 },
                             }
                         }
                         else {
-                            Err(Error::BadStatus(response.url, response.status))
+                            Err(Error::BadStatus(response.url.clone(), response.status))
                         }
                     },
                     Err(err) => Err(Error::ConnectionFailed(self.url)),
                 }
             );
+        });
+
+        thread::spawn(move || {
+            thread::sleep(Duration::from_secs(20));
+            let _ = tx_.send(Err(Error::TimedOut(url_)));
         });
         rx.recv().unwrap()
     }
