@@ -1,17 +1,17 @@
-// use spider::Spider;
+use spider::Spider;
 
 pub enum ItemProduct<T>{
     Item(T),
+    Ignore,
 }
 
-pub trait ItemPipeline{
+pub trait ItemPipeline: Send + Sync{
     type Items;
-    type Spider;
-    fn process_item<T>(&mut self, item: Self::Items, spider: &Self::Spider) -> ItemProduct<Self::Items>;
-    fn open_spider(&mut self, spider: &Self::Spider){
+    fn process_item(&self, item: Self::Items) -> ItemProduct<Self::Items>;
+    fn open_spider(&self, spider: &Box<Spider<Item=Self::Items>>){
 
     }
-    fn close_spider(&mut self, spider: &Self::Spider){
+    fn close_spider(&self, spider: &Box<Spider<Item=Self::Items>>){
 
     }
 }

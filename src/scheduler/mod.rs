@@ -1,14 +1,22 @@
 use http::{Request, Method};
+use engine::Crawler;
+use std::sync::Arc;
+use engine::Task;
 
-pub struct Scheduler{
-    pub queue: Vec<Request>,
+pub struct Scheduler<ItemType>{
+    pub queue: Vec<Task<ItemType>>,
 }
 
-impl Scheduler{
-    pub fn enqueue(&mut self, request: Request){
-        self.queue.push(request);
+impl<ItemType> Scheduler<ItemType>{
+    pub fn new() -> Self{
+        Scheduler{
+            queue: vec![],
+        }
     }
-    pub fn dequeue(&mut self) -> Option<Request>{
+    pub fn enqueue(&mut self, task: Task<ItemType>){
+        self.queue.push(task);
+    }
+    pub fn dequeue(&mut self) -> Option<Task<ItemType>>{
         self.queue.pop()
     }
 }

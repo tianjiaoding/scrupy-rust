@@ -1,11 +1,10 @@
 extern crate hyper;
 extern crate url;
-use self::hyper::client::response::Response;
 use self::hyper::Client;
-use http::{Request, Method};
+use http::{Request, Response, Method, RequestContent};
 use self::url::Url;
 
-pub trait Spider{
+pub trait Spider: Send + Sync{
     type Item;
     fn name(&self) -> &str;
     fn allowed_domains(&self) -> &[String];
@@ -17,9 +16,11 @@ pub trait Spider{
             match Url::parse(&start_url){
                 Ok(url) => {
                     requests.push(Request{
-                        url: url,
-                        method: Method::Get,
-                        body: None,
+                        content: RequestContent{
+                            url: url,
+                            method: Method::Get,
+                            body: None,
+                        },
                         client: Client::new(),
                     });
                 },
@@ -33,7 +34,7 @@ pub trait Spider{
     fn log(&self, _str: &str){
         println!("{}", _str);
     }
-    fn parse(&mut self, response: Response) -> (Option<Vec<Request>>, Option<Vec<Self::Item>>);
+    fn parse(&self, response: Response) -> (Vec<Request>, Vec<Self::Item>);
 }
 
 #[cfg(test)]

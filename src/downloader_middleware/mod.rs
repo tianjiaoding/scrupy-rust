@@ -1,10 +1,25 @@
 extern crate hyper;
-use http::{Request, Method};
-use self::hyper::client::response::Response;
+use http::{Request, RequestContent, Response, Method, Error};
+// use self::hyper::client::response::Response;
 
-pub trait DownloaderMiddleware{
-    type Spider;
-    fn process_request(request: Request, spider: &Self::Spider);
-    fn process_response(request: Request, response: Response, spider: &Self::Spider);
-    fn process_exception(request: Request, exception: Exception, spider: &Self::Spider);
+
+pub enum MiddleWareResult{
+    FinalRequest(Request),
+    IntermediateRequest(Request),
+    Response(Response),
+    Ignore,
+}
+
+pub enum MiddleWareExceptionResult{
+    Continue,
+    Request(Request),
+    Response(Response),
+}
+
+pub trait DownloaderMiddleware: Send + Sync{
+    /// Process request before it's sent to the downloader. Typical
+    /// application includes setting the timeout and redirection policy.
+    fn process_request(&self, request: Request) -> MiddleWareResult;
+    fn process_response(&self, request_content: &RequestContent, response: Response) -> MiddleWareResult;
+    fn process_exception(&self, request_content: &RequestContent, error: &Error) -> MiddleWareExceptionResult;
 }

@@ -4,6 +4,7 @@ mod scheduler;
 mod downloader;
 mod http;
 mod item_pipeline;
+mod downloader_middleware;
 
 
 #[cfg(test)]
