@@ -1,7 +1,7 @@
 extern crate hyper;
 extern crate url;
 use self::hyper::Client;
-use http::{Request, Response, Method, RequestContent};
+use downloader::{Request, Response, Method, RequestContent};
 use self::url::Url;
 
 pub trait Spider: Send + Sync{

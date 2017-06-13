@@ -1,7 +1,7 @@
 extern crate hyper;
 // use self::hyper::client::response::Response;
 use spider::Spider;
-use http::{Request, Response, RequestContent, Method};
+use downloader::{Request, Response, RequestContent, Method};
 use item_pipeline::{ItemPipeline, ItemProduct};
 use downloader_middleware::{DownloaderMiddleware, MiddleWareResult, MiddleWareExceptionResult};
 use scheduler::Scheduler;
@@ -75,7 +75,7 @@ impl<ItemType: 'static> Engine<ItemType>{
         }
     }
     pub fn run(&mut self) {
-        // Init requests.
+        // Init all requests
         self.init_requests();
         // Sends one URL to each worker.
         for i in 0..self.workers.len() {

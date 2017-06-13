@@ -1,5 +1,5 @@
 extern crate hyper;
-use http::{Request, RequestContent, Response, Method, Error};
+use downloader::{Request, RequestContent, Response, Method, Error};
 // use self::hyper::client::response::Response;
 
 

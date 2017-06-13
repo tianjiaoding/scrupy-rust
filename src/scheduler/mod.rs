@@ -1,4 +1,4 @@
-use http::{Request, Method};
+use downloader::{Request, Method};
 use engine::Crawler;
 use std::sync::Arc;
 use engine::Task;
