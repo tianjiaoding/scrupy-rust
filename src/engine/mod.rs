@@ -24,17 +24,20 @@ struct FinalProcessResult<ItemType>{
     worker_id: usize,
 }
 
+/// A task sent to worker, including a request and the crawler related to this crawler.
 pub struct Task<ItemType>{
     request: Request,
     crawler: Arc<Box<Crawler<ItemType>>>,
 }
 
+/// A craweler includes all the pipeline stages needed.
 pub struct Crawler<ItemType>{
     spider: Box<Spider<Item=ItemType>>,
     item_pipelines: Vec<Mutex<Box<ItemPipeline<Items=ItemType>>>>,
     downloader_middleware: Vec<Mutex<Box<DownloaderMiddleware>>>,
 }
 
+/// The core engine that controls the top control flow.
 struct Engine<ItemType: 'static>{
     crawlers: Vec<Arc<Box<Crawler<ItemType>>>>,
     scheduler: Scheduler<ItemType>,
@@ -46,7 +49,7 @@ struct Engine<ItemType: 'static>{
 }
 
 impl<ItemType: 'static> Engine<ItemType>{
-    fn new(n_workers: usize) -> Engine<ItemType>{
+    pub fn new(n_workers: usize) -> Engine<ItemType>{
         let mut tx_vec = vec![];
         let (id_tx, id_rx) = channel();
         let mut workers = vec![];
