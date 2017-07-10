@@ -1,5 +1,5 @@
 extern crate hyper;
-use downloader::{Request, RequestContent, Response, Method, Error};
+use downloader::{Request, RequestContent, Response, Method, DownloadError};
 // use self::hyper::client::response::Response;
 
 
@@ -21,5 +21,5 @@ pub trait DownloaderMiddleware: Send + Sync{
     /// application includes setting the timeout and redirection policy.
     fn process_request(&self, request: Request) -> MiddleWareResult;
     fn process_response(&self, request_content: &RequestContent, response: Response) -> MiddleWareResult;
-    fn process_exception(&self, request_content: &RequestContent, error: &Error) -> MiddleWareExceptionResult;
+    fn process_exception(&self, request_content: &RequestContent, error: &DownloadError) -> MiddleWareExceptionResult;
 }

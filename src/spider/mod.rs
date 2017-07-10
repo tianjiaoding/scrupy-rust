@@ -5,7 +5,7 @@ use downloader::{Request, Response, Method, RequestContent};
 use self::url::Url;
 
 pub trait Spider: Send + Sync{
-    type Item;
+    type ItemType;
     fn name(&self) -> &str;
     fn allowed_domains(&self) -> &[String];
     fn start_urls(&self) -> &[String];
@@ -34,7 +34,7 @@ pub trait Spider: Send + Sync{
     fn log(&self, _str: &str){
         println!("{}", _str);
     }
-    fn parse(&self, response: Response) -> (Vec<Request>, Vec<Self::Item>);
+    fn parse(&self, response: Response) -> (Vec<Request>, Vec<Self::ItemType>);
 }
 
 #[cfg(test)]

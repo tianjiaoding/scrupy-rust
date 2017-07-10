@@ -30,8 +30,8 @@ pub struct Task<ItemType>{
 }
 
 pub struct Crawler<ItemType>{
-    spider: Box<Spider<Item=ItemType>>,
-    item_pipelines: Vec<Box<ItemPipeline<Items=ItemType>>>,
+    spider: Box<Spider<ItemType=ItemType>>,
+    item_pipelines: Vec<Box<ItemPipeline<ItemType=ItemType>>>,
     downloader_middleware: Vec<Box<DownloaderMiddleware>>,
 }
 
@@ -139,8 +139,8 @@ impl<ItemType: 'static> Engine<ItemType>{
                 vec![r]
             },
             IntermediateProcessResult::Response(r) => {
-                let (requests, items) = crawler.spider.parse(r);
-                for item in items{
+                let (requests, ItemType) = crawler.spider.parse(r);
+                for item in ItemType{
                     Self::item_process_chain(item, crawler.clone());
                 }
                 requests
