@@ -10,7 +10,7 @@ use self::url::Url;
 use std::io::{Read, Error as ReadErr};
 use std::io::ErrorKind;
 
-/// Download error occured when issueing a request.
+/// Download error occured when issueing a `Request`.
 pub enum DownloadError{
     /// The status code is not Ok.
     BadStatus(HpResp),
@@ -22,7 +22,7 @@ pub enum DownloadError{
     BadRequest(HpErr),
 }
 
-/// Http method
+/// Http methods
 #[derive(Clone)]
 pub enum Method {
     /// Http get
@@ -62,6 +62,7 @@ pub struct Request
 }
 
 impl Request {
+    /// Issuse the `Request` to the server
     pub fn download(self)-> Result<Response, DownloadError> {
         let url = self.content.url.clone();
         let mut client: RequestBuilder;
