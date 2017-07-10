@@ -1,7 +1,6 @@
 extern crate hyper;
-// use self::hyper::client::response::Response;
 use spider::Spider;
-use downloader::{Request, Response, RequestContent, Method};
+use downloader::{Request, Response, RequestContent};
 use item_pipeline::{ItemPipeline, ItemProduct};
 use downloader_middleware::{DownloaderMiddleware, MiddleWareResult, MiddleWareExceptionResult};
 use scheduler::Scheduler;
@@ -10,6 +9,7 @@ use std::thread::spawn;
 use std::thread::JoinHandle;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Sender, Receiver};
+use std::sync::Mutex;
 
 /// Result for processing an request after it's sent to downloader and
 /// before it goes to item pipeline.
@@ -24,17 +24,20 @@ struct FinalProcessResult<ItemType>{
     worker_id: usize,
 }
 
+/// A task sent to worker, including a request and the crawler related to this crawler.
 pub struct Task<ItemType>{
     request: Request,
     crawler: Arc<Box<Crawler<ItemType>>>,
 }
 
+/// A craweler includes all the pipeline stages needed.
 pub struct Crawler<ItemType>{
     spider: Box<Spider<ItemType=ItemType>>,
-    item_pipelines: Vec<Box<ItemPipeline<ItemType=ItemType>>>,
-    downloader_middleware: Vec<Box<DownloaderMiddleware>>,
+    item_pipelines: Vec<Mutex<Box<ItemPipeline<Items=ItemType>>>>,
+    downloader_middleware: Vec<Mutex<Box<DownloaderMiddleware>>>,
 }
 
+/// The core engine that controls the top control flow.
 struct Engine<ItemType: 'static>{
     crawlers: Vec<Arc<Box<Crawler<ItemType>>>>,
     scheduler: Scheduler<ItemType>,
@@ -46,7 +49,7 @@ struct Engine<ItemType: 'static>{
 }
 
 impl<ItemType: 'static> Engine<ItemType>{
-    fn new(n_workers: usize) -> Engine<ItemType>{
+    pub fn new(n_workers: usize) -> Engine<ItemType>{
         let mut tx_vec = vec![];
         let (id_tx, id_rx) = channel();
         let mut workers = vec![];
@@ -153,7 +156,8 @@ impl<ItemType: 'static> Engine<ItemType>{
     fn item_process_chain(item: ItemType, cralwer: Arc<Box<Crawler<ItemType>>>){
         let mut item = item;
         for ip in &cralwer.item_pipelines{
-            match ip.process_item(item){
+            let mut ip_ = ip.lock().unwrap();
+            match ip_.process_item(item){
                 ItemProduct::Item(i) => item = i,
                 ItemProduct::Ignore => break,
             }
@@ -165,7 +169,8 @@ impl<ItemType: 'static> Engine<ItemType>{
                                 -> IntermediateProcessResult{
         let mut response = response;
         for dm in &cralwer.downloader_middleware{
-            match dm.process_response(request_content, response){
+            let mut dm_ = dm.lock().unwrap();
+            match dm_.process_response(request_content, response){
                 MiddleWareResult::FinalRequest(r) |
                 MiddleWareResult::IntermediateRequest(r) => return IntermediateProcessResult::Request(r),
                 MiddleWareResult::Response(r) => response = r,
@@ -178,7 +183,8 @@ impl<ItemType: 'static> Engine<ItemType>{
         let mut request = task.request;
         let mut cralwer = task.crawler;
         for dm in &cralwer.downloader_middleware{
-            match dm.process_request(request){
+            let mut dm_ = dm.lock().unwrap();
+            match dm_.process_request(request){
                 MiddleWareResult::FinalRequest(r) => return IntermediateProcessResult::Request(r),
                 MiddleWareResult::Response(r) => return IntermediateProcessResult::Response(r),
                 MiddleWareResult::IntermediateRequest(r) => request = r,
@@ -193,10 +199,17 @@ impl<ItemType: 'static> Engine<ItemType>{
             },
             Err(e) => {
                 for dm in &cralwer.downloader_middleware{
-                    match dm.process_exception(&request_content, &e){
-                        MiddleWareExceptionResult::Continue => (),
-                        MiddleWareExceptionResult::Request(r) => return IntermediateProcessResult::Request(r),
-                        MiddleWareExceptionResult::Response(r) => return Self::download_response_chain(&request_content, r, cralwer.clone()),
+                    let mut reprocess_response = None; // Using nested process and holding the response in the outer scope avoids acquiring another lock before releasing the current one.
+                    {
+                        let mut dm_ = dm.lock().unwrap();
+                        match dm_.process_exception(&request_content, &e){
+                            MiddleWareExceptionResult::Continue => (),
+                            MiddleWareExceptionResult::Request(r) => return IntermediateProcessResult::Request(r),
+                            MiddleWareExceptionResult::Response(r) => reprocess_response = Some(r),
+                        }
+                    }
+                    if let Some(r) = reprocess_response{
+                        return Self::download_response_chain(&request_content, r, cralwer.clone());
                     }
                 }
                 return IntermediateProcessResult::Ignore;

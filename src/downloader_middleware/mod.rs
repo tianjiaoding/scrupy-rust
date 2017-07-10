@@ -16,10 +16,10 @@ pub enum MiddleWareExceptionResult{
     Response(Response),
 }
 
-pub trait DownloaderMiddleware: Send + Sync{
-    /// Process request before it's sent to the downloader. Typical
-    /// application includes setting the timeout and redirection policy.
-    fn process_request(&self, request: Request) -> MiddleWareResult;
-    fn process_response(&self, request_content: &RequestContent, response: Response) -> MiddleWareResult;
-    fn process_exception(&self, request_content: &RequestContent, error: &DownloadError) -> MiddleWareExceptionResult;
+/// Process request before it's sent to the downloader. Typical
+/// application includes setting the timeout and redirection policy.
+pub trait DownloaderMiddleware: Send{
+    fn process_request(&mut self, request: Request) -> MiddleWareResult;
+    fn process_response(&mut self, request_content: &RequestContent, response: Response) -> MiddleWareResult;
+    fn process_exception(&mut self, request_content: &RequestContent, error: &DownloadError) -> MiddleWareExceptionResult;
 }

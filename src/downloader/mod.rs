@@ -7,13 +7,8 @@ use self::hyper::status::StatusCode;
 use self::hyper::client::response::Response as HpResp;
 use self::hyper::error::Error as HpErr;
 use self::url::Url;
-use std::sync::mpsc::channel;
-use std::thread;
 use std::io::{Read, Error as ReadErr};
 use std::io::ErrorKind;
-use std::time::Duration;
-use std::sync::Arc;
-use engine::Crawler;
 
 /// Download error occured when issueing a request.
 pub enum DownloadError{
@@ -27,28 +22,43 @@ pub enum DownloadError{
     BadRequest(HpErr),
 }
 
+/// Http method
 #[derive(Clone)]
-/// 
+///
 pub enum Method {
+    /// Http get
     Get,
+    /// Http post
     Post,
 }
 
+/// A simple ok response including url, headers and body.
 pub struct Response {
+    /// The target url from the original `Request`
     pub url: Url,
+    /// The reponse header
     pub headers: Headers,
+    /// The response body. Can be either text or binary.
     pub body: Vec<u8>,//TODO: use a better linear container.
 }
 
+/// The content of a `Request` including url, headers and body.
 #[derive(Clone)]
 pub struct RequestContent{
+    /// The target url
     pub url: Url,
+    /// The method used to issue the `Request`
     pub method: Method,
+    /// The body, text only for now
     pub body: Option<String>,
 }
+
+/// A simple request
 pub struct Request
 {
+    /// The request content
     pub content: RequestContent,
+    /// The hyper client used for issuing the request
     pub client: Client,
 }
 
