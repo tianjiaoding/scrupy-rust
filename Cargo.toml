@@ -2,6 +2,8 @@
 name = "scrupy"
 version = "0.1.0"
 authors = ["dingtj <dingtj@shanghaitech.edu.cn>"]
+description = "Scrupy is a fast, modern spider framework written in and for Rust. The framework implements the functionalities of Scrapy, but is low-level and typesafe. It exposes an elegant API and uses zero unsafe code."
+license = "MIT"
 
 [dependencies]
 hyper = "0.10.*"
