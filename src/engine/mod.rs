@@ -39,8 +39,11 @@ pub struct Crawler<ItemType>{
 
 /// The core engine that controls the top control flow.
 struct Engine<ItemType: 'static>{
+    /// A set of crawlers that the engine handles.
     crawlers: Vec<Arc<Box<Crawler<ItemType>>>>,
+    /// One scheduler that schedules the tasks based on priority.
     scheduler: Scheduler<ItemType>,
+    /// Handles of all the threads.
     workers: Vec<JoinHandle<()>>,
     /// Sending tasks to each worker.
     txs: Vec<Sender<Task<ItemType>>>,
@@ -49,6 +52,7 @@ struct Engine<ItemType: 'static>{
 }
 
 impl<ItemType: 'static> Engine<ItemType>{
+    /// Create a new engine with numbers of workers specified.
     pub fn new(n_workers: usize) -> Engine<ItemType>{
         let mut tx_vec = vec![];
         let (id_tx, id_rx) = channel();
@@ -77,6 +81,7 @@ impl<ItemType: 'static> Engine<ItemType>{
             }
         }
     }
+    /// Run the engine.
     pub fn run(&mut self) {
         // Init all requests
         self.init_requests();
