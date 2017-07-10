@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["dingtj <dingtj@shanghaitech.edu.cn>"]
 
 [dependencies]
-hyper = "*"
+hyper = "0.10.*"
 url = "*"
