@@ -1,3 +1,5 @@
+//! Spider module
+
 extern crate hyper;
 extern crate url;
 use self::hyper::Client;
@@ -13,7 +15,7 @@ pub trait Spider: Send + Sync{
     /// Returns a set of urls for the spider to start with.
     fn start_urls(&self) -> &[String];
     /// Returns a set of start requests for the spider to start with. By default
-    /// It will call start_urls() to get start urls and issue http get requests 
+    /// It will call start_urls() to get start urls and issue http get requests
     /// to those urls.
     fn start_requests(&self) -> Vec<Request>{
         let start_urls = self.start_urls();

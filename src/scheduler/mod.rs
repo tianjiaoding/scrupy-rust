@@ -1,8 +1,11 @@
+//! Scheduler module
+
 use downloader::{Request, Method};
 use engine::Crawler;
 use std::sync::Arc;
 use engine::Task;
 
+/// The scheduler. Currently, the order of items in the scheduler is subject to FIFO.
 pub struct Scheduler<ItemType>{
     pub queue: Vec<Task<ItemType>>,
 }

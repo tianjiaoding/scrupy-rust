@@ -1,3 +1,5 @@
+//! Engine module
+
 extern crate hyper;
 use spider::Spider;
 use downloader::{Request, Response, RequestContent};
@@ -19,6 +21,7 @@ enum IntermediateProcessResult{
     Ignore,
 }
 
+/// New tasks and the worker that produce the new task.
 struct FinalProcessResult<ItemType>{
     new_tasks: Vec<Task<ItemType>>,
     worker_id: usize,
@@ -26,11 +29,13 @@ struct FinalProcessResult<ItemType>{
 
 /// A task sent to worker, including a request and the crawler related to this crawler.
 pub struct Task<ItemType>{
+    /// The request
     request: Request,
+    /// The crawler that issues the request
     crawler: Arc<Box<Crawler<ItemType>>>,
 }
 
-/// A craweler includes all the pipeline stages needed.
+/// A craweler includes one spider, item_pipelines and downloader middlewares.
 pub struct Crawler<ItemType>{
     spider: Box<Spider<ItemType=ItemType>>,
     item_pipelines: Vec<Mutex<Box<ItemPipeline<ItemType=ItemType>>>>,
@@ -38,7 +43,7 @@ pub struct Crawler<ItemType>{
 }
 
 /// The core engine that controls the top control flow.
-struct Engine<ItemType: 'static>{
+pub struct Engine<ItemType: 'static>{
     /// A set of crawlers that the engine handles.
     crawlers: Vec<Arc<Box<Crawler<ItemType>>>>,
     /// One scheduler that schedules the tasks based on priority.
@@ -52,7 +57,7 @@ struct Engine<ItemType: 'static>{
 }
 
 impl<ItemType: 'static> Engine<ItemType>{
-    /// Create a new engine with numbers of workers specified.
+    /// Create a new engine with numbers of workers specified and no crawler.
     pub fn new(n_workers: usize) -> Engine<ItemType>{
         let mut tx_vec = vec![];
         let (id_tx, id_rx) = channel();
@@ -70,6 +75,10 @@ impl<ItemType: 'static> Engine<ItemType>{
             txs: tx_vec,
             rx: id_rx,
         }
+    }
+    /// Add a crawler to the engine.
+    pub fn add_crawler(&mut self, crawler: Crawler<ItemType>){
+        self.crawlers.push(Arc::new(Box::new(crawler)));
     }
     fn init_requests(&mut self){
         for s in &self.crawlers{

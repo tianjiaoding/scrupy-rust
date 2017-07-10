@@ -1,3 +1,6 @@
+//! Downloader module
+
+
 extern crate hyper;
 extern crate url;
 use self::hyper::Client;
@@ -18,7 +21,7 @@ pub enum DownloadError{
     TimedOut(HpResp),
     /// Other read error except for timeout.
     ReadError(HpResp, ReadErr),
-    /// Errors that can occur parsing HTTP streams.
+    /// Errors that can occur in parsing HTTP streams.
     BadRequest(HpErr),
 }
 

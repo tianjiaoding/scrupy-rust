@@ -1,3 +1,5 @@
+//! Item pipeline module
+
 use spider::Spider;
 
 /// Processed result of itempipeline
