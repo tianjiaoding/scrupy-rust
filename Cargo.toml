@@ -7,4 +7,4 @@ license = "MIT"
 
 [dependencies]
 hyper = "0.10.12"
-url = "*"
+url = "1.5.1"
