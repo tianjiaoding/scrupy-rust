@@ -26,7 +26,10 @@ pub enum MiddleWareExceptionResult{
 /// It processes the request before it's sent to the downloader. Typical
 /// application includes setting the timeout and redirection policy.
 pub trait DownloaderMiddleware: Send{
+    /// Called when a `Request` is processed.
     fn process_request(&mut self, request: Request) -> MiddleWareResult;
+    /// Called when a `Response` is processed.
     fn process_response(&mut self, request_content: &RequestContent, response: Response) -> MiddleWareResult;
+    /// Called when a `DownloadError` is processed.
     fn process_exception(&mut self, request_content: &RequestContent, error: &DownloadError) -> MiddleWareExceptionResult;
 }
