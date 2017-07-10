@@ -24,7 +24,6 @@ pub enum DownloadError{
 
 /// Http method
 #[derive(Clone)]
-///
 pub enum Method {
     /// Http get
     Get,
