@@ -9,12 +9,12 @@ pub enum ItemProduct<T>{
 }
 
 pub trait ItemPipeline: Send{
-    type Items;
-    fn process_item(&mut self, item: Self::Items) -> ItemProduct<Self::Items>;
-    fn open_spider(&mut self, spider: &Box<Spider<ItemType=Self::Items>>){
+    type ItemType;
+    fn process_item(&mut self, item: Self::ItemType) -> ItemProduct<Self::ItemType>;
+    fn open_spider(&mut self, spider: &Box<Spider<ItemType=Self::ItemType>>){
 
     }
-    fn close_spider(&mut self, spider: &Box<Spider<ItemType=Self::Items>>){
+    fn close_spider(&mut self, spider: &Box<Spider<ItemType=Self::ItemType>>){
 
     }
 }

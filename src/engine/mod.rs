@@ -33,7 +33,7 @@ pub struct Task<ItemType>{
 /// A craweler includes all the pipeline stages needed.
 pub struct Crawler<ItemType>{
     spider: Box<Spider<ItemType=ItemType>>,
-    item_pipelines: Vec<Mutex<Box<ItemPipeline<Items=ItemType>>>>,
+    item_pipelines: Vec<Mutex<Box<ItemPipeline<ItemType=ItemType>>>>,
     downloader_middleware: Vec<Mutex<Box<DownloaderMiddleware>>>,
 }
 
