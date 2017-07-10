@@ -1,10 +1,10 @@
 [package]
 name = "scrupy"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["dingtj <dingtj@shanghaitech.edu.cn>"]
 description = "Scrupy is a fast, modern spider framework written in and for Rust. The framework implements the functionalities of Scrapy, but is low-level and typesafe. It exposes an elegant API and uses zero unsafe code."
 license = "MIT"
-documentation = "https://docs.rs/scrupy/0.1.0/scrupy/"
+documentation = "https://docs.rs/scrupy/"
 homepage = "https://github.com/RunningCool/CS230_17s"
 repository = "https://github.com/RunningCool/CS230_17s"
 
